@@ -1082,6 +1082,9 @@ async function initAuth() {
   }
   updateAuthUI();
   if (authState && authState.access_token && authState.user) {
+    if (QuickAccessController?.syncOnLogin) {
+      QuickAccessController.syncOnLogin().catch(() => {});
+    }
     claimDeviceHistory().then((claimed) => {
       if (claimed > 0) return markUnsyncedHistoryAsSynced();
       return syncUnsyncedHistory();
@@ -1099,6 +1102,9 @@ async function initAuth() {
         const modal = document.getElementById("authModal");
         if (modal) modal.classList.add("hidden");
         resetMagicLinkUI();
+        if (QuickAccessController?.syncOnLogin) {
+          QuickAccessController.syncOnLogin().catch(() => {});
+        }
         claimDeviceHistory().then((claimed) => {
           if (claimed > 0) return markUnsyncedHistoryAsSynced();
           return syncUnsyncedHistory();
@@ -1417,6 +1423,11 @@ async function setAuthState(session) {
   };
   await chrome.storage.local.set({ auth: authState });
   updateAuthUI();
+  try {
+    if (QuickAccessController?.syncOnLogin) {
+      await QuickAccessController.syncOnLogin();
+    }
+  } catch (_) {}
   try {
     const claimed = await claimDeviceHistory();
     if (claimed > 0) {
@@ -3257,6 +3268,74 @@ const kAllMedia = [
 ];
 
 // ================================================================
+// FAVORITES SYNC (SUPABASE)
+// ================================================================
+
+async function getAuthUserId() {
+  await ensureAuthFresh();
+  if (!authState?.access_token) return null;
+  if (!authState.user) {
+    authState.user = await fetchAuthUser(authState.access_token);
+    if (authState.user) {
+      await chrome.storage.local.set({ auth: authState });
+    }
+  }
+  return authState?.user?.id || null;
+}
+
+async function fetchCloudFavorites() {
+  const userId = await getAuthUserId();
+  if (!userId) return [];
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/user_favorites?select=media_url&user_id=eq.${userId}&order=created_at.asc.nullslast`;
+    const res = await fetch(url, {
+      headers: {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${authState.access_token}`,
+        "Accept": "application/json"
+      }
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data || []).map(r => r.media_url).filter(Boolean);
+  } catch (_) {
+    return [];
+  }
+}
+
+async function upsertCloudFavorite(url) {
+  const userId = await getAuthUserId();
+  if (!userId) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/user_favorites?on_conflict=user_id,media_url`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${authState.access_token}`,
+        "Prefer": "resolution=merge-duplicates,return=minimal"
+      },
+      body: JSON.stringify({ user_id: userId, media_url: url })
+    });
+  } catch (_) {}
+}
+
+async function deleteCloudFavorite(url) {
+  const userId = await getAuthUserId();
+  if (!userId) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/user_favorites?user_id=eq.${userId}&media_url=eq.${encodeURIComponent(url)}`, {
+      method: "DELETE",
+      headers: {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${authState.access_token}`,
+        "Prefer": "return=minimal"
+      }
+    });
+  } catch (_) {}
+}
+
+// ================================================================
 // SCHNELLZUGRIFF (QUICK ACCESS) WIDGET
 // ================================================================
 
@@ -3268,10 +3347,13 @@ const QuickAccessController = {
   isSearching: false,
   displayedItems: [],
   gridTimer: null,
+  _initialized: false,
 
   async init() {
     const data = await chrome.storage.local.get(['qa_favorites']);
     this.favorites = Array.isArray(data.qa_favorites) ? data.qa_favorites : [];
+    this._initialized = true;
+    await this.syncOnLogin({ skipRender: true });
     this.initGrid();
     this.renderGrid();
     this.bindEvents();
@@ -3283,17 +3365,50 @@ const QuickAccessController = {
     await chrome.storage.local.set({ qa_favorites: this.favorites });
   },
 
+  async syncOnLogin({ skipRender = false } = {}) {
+    const cloud = await fetchCloudFavorites();
+    if (!cloud.length && !authState?.user?.id) return;
+
+    const local = this.favorites || [];
+    const mergedSet = new Set([...cloud, ...local]);
+    const merged = Array.from(mergedSet);
+    const localOnly = local.filter(u => !cloud.includes(u));
+
+    if (merged.length !== local.length) {
+      this.favorites = merged;
+      await chrome.storage.local.set({ qa_favorites: merged });
+    }
+
+    for (const url of localOnly) {
+      await upsertCloudFavorite(url);
+    }
+
+    if (!skipRender && this._initialized) {
+      this.initGrid();
+      this.renderGrid();
+      this.renderMediaList();
+    }
+  },
+
   isFav(url) {
     return this.favorites.includes(url);
   },
 
   async toggleFav(url) {
-    if (this.isFav(url)) {
+    const wasFav = this.isFav(url);
+    if (wasFav) {
       this.favorites = this.favorites.filter(u => u !== url);
     } else {
       this.favorites.push(url);
     }
     await this.saveFavorites();
+    if (authState?.access_token) {
+      if (wasFav) {
+        await deleteCloudFavorite(url);
+      } else {
+        await upsertCloudFavorite(url);
+      }
+    }
     if (this.isSearching) {
       this.updateGridForSearch();
     } else {
