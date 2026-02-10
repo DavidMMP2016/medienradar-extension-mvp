@@ -173,6 +173,11 @@ body {
 .tab-btn.active .nav-icon-wrap.has-pulse {
     background: transparent;
 }
+.nav-icon-wrap.has-pulse {
+  padding: 0;
+  width: 42px;
+  height: 42px;
+}
 
 /* RADAR PULSE ANIMATION (matches Flutter _PulsePainter) */
 .radar-pulse-icon {
@@ -180,8 +185,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   z-index: 1;
 }
 
@@ -1003,6 +1008,12 @@ input:focus { border-color: var(--primary); }
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+.mw-header .mw-title {
+  flex: 1;
+}
+.mw-header .icon-btn {
+  margin-left: auto;
 }
 .mw-title {
   display: flex; align-items: center; gap: 6px;
