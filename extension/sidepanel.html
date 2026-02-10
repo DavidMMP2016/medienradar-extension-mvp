@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JournalRadar</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <!-- ====== ONBOARDING OVERLAY ====== -->
+  <div id="onboardingOverlay" class="onb-overlay hidden">
+    <button class="onb-close-btn" id="onbCloseBtn" title="Überspringen">
+      <span class="material-icons-outlined">close</span>
+    </button>
+
+    <div class="onb-pages-container" id="onbPagesContainer">
+
+      <!-- PAGE 1: Welcome -->
+      <div class="onb-page" id="onbWelcome">
+        <div class="onb-page-inner">
+          <canvas id="radarCanvas" class="onb-radar-canvas" width="260" height="260"></canvas>
+          <h1 class="onb-title">Willkommen bei<br>JournalRadar</h1>
+          <p class="onb-subtitle">Dein digitales Immunsystem gegen Clickbait, Framing und Manipulation.</p>
+          <button class="onb-btn" id="onbBtnWelcome">
+            <span class="material-icons-outlined">radar</span> Radar starten
+          </button>
+        </div>
+      </div>
+
+      <!-- PAGE 2: Problem -->
+      <div class="onb-page" id="onbProblem">
+        <div class="onb-page-inner">
+          <div class="onb-floating-icons">
+            <span class="onb-float-icon" style="--i:0"><span class="material-icons-outlined">newspaper</span></span>
+            <span class="onb-float-icon" style="--i:1"><span class="material-icons-outlined">tv</span></span>
+            <span class="onb-float-icon" style="--i:2"><span class="material-icons-outlined">phone_android</span></span>
+            <span class="onb-float-icon" style="--i:3"><span class="material-icons-outlined">podcasts</span></span>
+            <span class="onb-float-icon" style="--i:4"><span class="material-icons-outlined">public</span></span>
+            <span class="onb-float-icon" style="--i:5"><span class="material-icons-outlined">rss_feed</span></span>
+          </div>
+          <div class="onb-counter-box">
+            <span class="onb-counter-label">Jeden Tag</span>
+            <span class="onb-counter-value" id="onbHeadlineCounter">0</span>
+            <span class="onb-counter-label">Schlagzeilen</span>
+          </div>
+          <div class="onb-stat-card">
+            <span class="onb-stat-value" id="onbEmotionCounter">0</span><span class="onb-stat-pct">%</span>
+            <span class="onb-stat-label">emotionale Sprache</span>
+          </div>
+          <p class="onb-subtitle" style="margin-top:16px;">Wer blickt da noch durch?</p>
+          <button class="onb-btn" id="onbBtnProblem">Weiter</button>
+        </div>
+      </div>
+
+      <!-- PAGE 3: Solution -->
+      <div class="onb-page" id="onbSolution">
+        <div class="onb-page-inner">
+          <h1 class="onb-title">4 Dimensionen<br>für klare Sicht</h1>
+          <div class="onb-feature-grid" id="onbFeatureGrid">
+            <div class="onb-feature-card" data-delay="0">
+              <span class="material-icons-outlined" style="color:#00BFA6">balance</span>
+              <span class="onb-feature-label">Neutralität</span>
+            </div>
+            <div class="onb-feature-card" data-delay="1">
+              <span class="material-icons-outlined" style="color:#3B82F6">fact_check</span>
+              <span class="onb-feature-label">Fakten</span>
+            </div>
+            <div class="onb-feature-card" data-delay="2">
+              <span class="material-icons-outlined" style="color:#EC4899">psychology</span>
+              <span class="onb-feature-label">Emotion</span>
+            </div>
+            <div class="onb-feature-card" data-delay="3">
+              <span class="material-icons-outlined" style="color:#F59E0B">ads_click</span>
+              <span class="onb-feature-label">Clickbait</span>
+            </div>
+          </div>
+          <button class="onb-btn" id="onbBtnSolution">
+            <span class="material-icons-outlined">tune</span> Radar kalibrieren
+          </button>
+        </div>
+      </div>
+
+      <!-- PAGE 4: Media Selection -->
+      <div class="onb-page" id="onbMedia">
+        <div class="onb-page-inner onb-media-page">
+          <h1 class="onb-title">Deine Medien<br>auswählen</h1>
+          <div class="onb-media-counter" id="onbMediaCounter">0/1 ausgewählt</div>
+          <div class="onb-media-grid" id="onbMediaGrid"></div>
+          <button class="onb-btn onb-btn-disabled" id="onbBtnMedia" disabled>
+            <span class="material-icons-outlined">bookmark</span> Favoriten speichern
+          </button>
+        </div>
+      </div>
+
+      <!-- PAGE 5: Complete -->
+      <div class="onb-page" id="onbComplete">
+        <div class="onb-page-inner">
+          <canvas id="confettiCanvas" class="onb-confetti-canvas" width="400" height="600"></canvas>
+          <div class="onb-check-circle">
+            <span class="material-icons-outlined">check</span>
+          </div>
+          <h1 class="onb-title">Dein Radar ist<br>kalibriert!</h1>
+          <p class="onb-subtitle">Du bist bereit, deine ersten Artikel zu durchleuchten.</p>
+          <button class="onb-btn" id="onbBtnComplete">
+            <span class="material-icons-outlined">search</span> Ersten Artikel analysieren
+          </button>
+          <button class="onb-skip-link" id="onbBtnSkipTour">Erst mal umsehen</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="onb-dots" id="onbDots">
+      <span class="onb-dot active"></span>
+      <span class="onb-dot"></span>
+      <span class="onb-dot"></span>
+      <span class="onb-dot"></span>
+      <span class="onb-dot"></span>
+    </div>
+  </div>
+
+  <!-- ====== GUIDED TOUR OVERLAYS ====== -->
+  <div id="guidedTourCoach" class="tour-coach hidden">
+    <div class="tour-coach-bubble">
+      <div class="tour-coach-icon" id="tourCoachIcon">
+        <span class="material-icons-outlined">radar</span>
+      </div>
+      <div class="tour-coach-content">
+        <div class="tour-coach-title" id="tourCoachTitle">Titel</div>
+        <div class="tour-coach-desc" id="tourCoachDesc">Beschreibung</div>
+      </div>
+      <button class="tour-coach-close" id="tourCoachClose">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+    <div class="tour-coach-arrow"></div>
+  </div>
+
+  <div id="tourAnalyzingOverlay" class="tour-analyzing hidden">
+    <canvas id="tourRadarMini" class="tour-radar-mini" width="120" height="120"></canvas>
+    <div class="tour-analyzing-title">Analyse läuft...</div>
+    <div class="tour-steps" id="tourSteps">
+      <div class="tour-step" data-step="0">
+        <span class="tour-step-icon material-icons-outlined">hourglass_empty</span>
+        <span>Neutralität prüfen</span>
+      </div>
+      <div class="tour-step" data-step="1">
+        <span class="tour-step-icon material-icons-outlined">hourglass_empty</span>
+        <span>Fakten checken</span>
+      </div>
+      <div class="tour-step" data-step="2">
+        <span class="tour-step-icon material-icons-outlined">hourglass_empty</span>
+        <span>Emotionen erkennen</span>
+      </div>
+      <div class="tour-step" data-step="3">
+        <span class="tour-step-icon material-icons-outlined">hourglass_empty</span>
+        <span>Clickbait analysieren</span>
+      </div>
+      <div class="tour-step" data-step="4">
+        <span class="tour-step-icon material-icons-outlined">hourglass_empty</span>
+        <span>Bewertung berechnen</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="tourResultOverlay" class="tour-result hidden">
+    <div class="tour-result-dots" id="tourResultDots"></div>
+    <div class="tour-result-content" id="tourResultContent">
+      <span class="tour-result-icon material-icons-outlined" id="tourResultIcon">balance</span>
+      <h2 class="tour-result-title" id="tourResultTitle">Neutralität</h2>
+      <p class="tour-result-desc" id="tourResultDesc">Beschreibung</p>
+    </div>
+    <div class="tour-result-buttons">
+      <button class="tour-result-skip" id="tourResultSkip">Überspringen</button>
+      <button class="onb-btn tour-result-next" id="tourResultNext">Weiter</button>
+    </div>
+  </div>
+
+  <div id="tourCompleteOverlay" class="tour-complete hidden">
+    <div class="tour-complete-icon">
+      <span class="material-icons-outlined">celebration</span>
+    </div>
+    <h1 class="onb-title">Glückwunsch!</h1>
+    <p class="onb-subtitle">Du weißt jetzt, wie JournalRadar funktioniert.</p>
+    <button class="onb-btn" id="tourCompleteBtn">
+      <span class="material-icons-outlined">dashboard</span> Zur App
+    </button>
+  </div>
+
+  <!-- Ambient Background Orbs -->
+  <div class="ambient-background">
+    <div class="ambient-orb ambient-orb-1"></div>
+    <div class="ambient-orb ambient-orb-2"></div>
+    <div class="ambient-orb ambient-orb-3"></div>
+  </div>
+
+  <header class="header">
+    <div class="logo-row">
+      <span class="material-icons-outlined logo-icon">radar</span>
+      <span>JournalRadar</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:4px;">
+      <button id="btnInfo" class="icon-btn" title="Info">
+        <span class="material-icons-outlined">lightbulb</span>
+      </button>
+      <button id="btnHelp" class="icon-btn help-btn-circle" title="Hilfe">
+        <span class="material-icons-outlined">help_outline</span>
+      </button>
+      <button id="btnAuth" class="icon-btn" title="Login">
+        <span id="authIcon" class="material-icons-outlined">login</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="nav-tabs">
+    <button class="tab-btn" data-target="viewMedia">
+      <span class="nav-icon-wrap"><span class="material-icons-outlined">dashboard</span></span>
+      Medienlage
+    </button>
+    <button class="tab-btn active" data-target="viewScanner">
+      <span class="nav-icon-wrap has-pulse">
+        <span class="radar-pulse-icon">
+          <span class="radar-pulse-ring"></span>
+          <span class="radar-pulse-ring"></span>
+          <span class="radar-pulse-ring"></span>
+          <span class="material-icons-outlined radar-icon">radar</span>
+        </span>
+      </span>
+      Radar
+    </button>
+    <button class="tab-btn" data-target="viewDashboard">
+      <span class="nav-icon-wrap"><span class="material-icons-outlined">person</span></span>
+      Meine Analysen
+    </button>
+  </div>
+
+  <div class="content-area">
+
+    <div id="viewScanner" class="view-container">
+
+      <!-- === SCHNELLZUGRIFF WIDGET === -->
+      <div id="quickAccessWidget" class="qa-widget">
+        <div class="qa-section">
+          <div class="qa-section-title">
+            <span class="material-icons-outlined" style="font-size:18px; color:var(--primary);">flash_on</span>
+            <span>Schnellzugriff</span>
+            <a id="qaShowAllLink" class="qa-show-all-link">Alle anzeigen <span class="material-icons-outlined" style="font-size:14px; vertical-align:middle;">arrow_forward</span></a>
+          </div>
+          <div class="qa-search-wrap">
+            <span class="material-icons-outlined qa-search-icon">search</span>
+            <input id="qaSearchInput" type="text" class="qa-search" placeholder="Medienhaus suchen...">
+          </div>
+          <div id="qaLivingGrid" class="qa-living-grid"></div>
+          <button id="qaRandomBtn" class="qa-random-btn">
+            <span class="material-icons-outlined">shuffle</span> Random
+          </button>
+        </div>
+      </div>
+
+      <div id="stateStart" class="empty-state hidden">
+        <span class="material-icons-outlined">article</span>
+        <p>Öffne einen Artikel und klicke unten auf "Analyse Starten"</p>
+      </div>
+
+      <div id="stateLoading" class="empty-state hidden">
+        <div class="spinner"></div>
+        <p id="loadingStatus">Lese Artikel...</p>
+      </div>
+
+      <div id="stateResult" class="hidden" style="padding:16px; display:flex; flex-direction:column; gap:16px;">
+        <div class="meta-box" style="position:relative;">
+          <button id="btnCloseScorecard" class="qa-close-btn" title="Scorecard schließen">
+            <span class="material-icons-outlined">close</span>
+          </button>
+          <div style="font-weight:600; color:var(--primary); font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Analyse des Artikels</div>
+          <div id="metaTitle" style="font-size:15px; font-weight:700; color:var(--text-main); margin-bottom:4px; line-height:1.3; cursor:pointer;">Lade Titel...</div>
+          <div id="metaUrl" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:var(--text-muted);">...</div>
+        </div>
+
+        <!-- All cards rendered dynamically by renderData() -->
+        <div id="scorecardCards"></div>
+      </div>
+    </div>
+
+    <div id="viewDashboard" class="view-container hidden">
+        <div class="ma-page">
+            <div class="history-tabs">
+                <button class="history-tab active" data-history-tab="eigene">Eigene</button>
+                <button class="history-tab" data-history-tab="debate">Debatten-Radar</button>
+            </div>
+
+            <div id="maLoading" class="glass-card" style="text-align:center; padding:24px;">
+                <div class="spinner" style="margin:0 auto 8px;"></div>
+                <div style="color:var(--text-muted); font-size:13px;">Lade Verlauf...</div>
+            </div>
+
+            <div id="maEmpty" class="glass-card hidden">
+                <div class="gc-header">
+                    <span class="material-icons-outlined gc-icon" style="color:var(--primary);">history</span>
+                    <span class="gc-title" id="maEmptyTitle">Noch keine Analysen</span>
+                </div>
+                <p id="maEmptyText" style="color:var(--text-muted); font-size:13px; line-height:1.5; margin:0;"></p>
+            </div>
+
+            <div id="maContent" class="ma-content hidden">
+                <!-- Dashboard Card -->
+                <div class="glass-card">
+                    <div class="gc-header">
+                        <span class="material-icons-outlined gc-icon" style="color:var(--primary);">assessment</span>
+                        <span class="gc-title">Dashboard</span>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="ma-stat-tile"><span class="ma-stat-label">Analysen</span><span class="ma-stat-value" id="dashTotal">0</span></div>
+                        <div class="ma-stat-tile"><span class="ma-stat-label">Ø‑Score</span><span class="ma-stat-value" id="dashAvg">-</span></div>
+                    </div>
+                    <p id="dashAdvice" style="color:var(--text-muted); font-size:13px; line-height:1.5; margin:8px 0 0;"></p>
+                </div>
+
+                <!-- Qualitäts-Mix Card -->
+                <div class="glass-card">
+                    <div class="gc-header">
+                        <span class="material-icons-outlined gc-icon" style="color:var(--primary);">bar_chart</span>
+                        <span class="gc-title">Qualitäts-Mix</span>
+                    </div>
+                    <div style="display:flex; height:12px; border-radius:999px; overflow:hidden; width:100%; background:rgba(255,255,255,0.08);">
+                        <div id="barGreen" style="background:#69F0AE; width:0%; transition:width .4s;"></div>
+                        <div id="barYellow" style="background:#fbbf24; width:0%; transition:width .4s;"></div>
+                        <div id="barRed" style="background:#FF5252; width:0%; transition:width .4s;"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:12px; color:var(--text-muted);">
+                        <span id="labelGreen">0% Stark</span><span id="labelYellow">0% Mittel</span><span id="labelRed">0% Kritisch</span>
+                    </div>
+                </div>
+
+                <!-- Top Quellen Card -->
+                <div class="glass-card">
+                    <div class="gc-header">
+                        <span class="material-icons-outlined gc-icon" style="color:var(--primary);">public</span>
+                        <span class="gc-title">Top Quellen</span>
+                    </div>
+                    <div id="topSourcesList"></div>
+                </div>
+
+                <!-- Ressort-Mix Card -->
+                <div class="glass-card">
+                    <div class="gc-header">
+                        <span class="material-icons-outlined gc-icon" style="color:var(--primary);">category</span>
+                        <span class="gc-title">Ressort-Mix</span>
+                    </div>
+                    <div id="topTopicsList"></div>
+                </div>
+
+                <!-- Verlauf Card -->
+                <div class="glass-card">
+                    <div class="gc-header">
+                        <span class="material-icons-outlined gc-icon" style="color:var(--primary);">history</span>
+                        <span class="gc-title">Verlauf</span>
+                    </div>
+                    <!-- Controls: Search + Auswahl -->
+                    <div id="maControls" class="ma-controls">
+                        <div class="ma-search-wrap">
+                            <span class="material-icons-outlined" style="font-size:18px; color:var(--text-muted);">search</span>
+                            <input id="maSearchInput" type="text" class="ma-search" placeholder="Suchen...">
+                            <button id="maSearchClear" class="ma-search-clear hidden">
+                                <span class="material-icons-outlined" style="font-size:16px;">close</span>
+                            </button>
+                        </div>
+                        <button id="maSelectBtn" class="ma-select-btn">Auswahl</button>
+                    </div>
+                    <!-- Selection Mode Controls -->
+                    <div id="maSelectionBar" class="ma-selection-bar hidden">
+                        <button id="maSelectAll" class="ma-sel-action">Alle auswählen</button>
+                        <div style="display:flex; gap:8px; flex:1;">
+                            <button id="maDeleteSelected" class="ma-sel-delete" disabled>
+                                <span class="material-icons-outlined" style="font-size:16px;">delete_outline</span> Auswahl löschen
+                            </button>
+                            <button id="maSelDone" class="ma-sel-done">Fertig</button>
+                        </div>
+                    </div>
+                    <div id="historyList" class="ma-history-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewMedia" class="view-container hidden">
+        <div class="media-page">
+            <div class="media-page-header">
+                <div class="media-page-title">Medienlage</div>
+                <button id="mediaInfoBtn" class="icon-btn" title="Info">
+                    <span class="material-icons-outlined">info_outlined</span>
+                </button>
+            </div>
+            <div id="mediaStatus" class="subtle-text">Lade Medienlage ...</div>
+
+            <div id="medienlageEmpty" class="empty-state" style="height:auto; padding:20px 0;">
+                <span class="material-icons-outlined">insights</span>
+                <p>Scanne ein paar Artikel, dann erscheint hier deine Medienlage.</p>
+            </div>
+
+            <div id="medienlageContent" class="hidden">
+                <!-- ======= MEDIENWETTER ======= -->
+                <div class="mw-card">
+                    <div class="mw-header">
+                        <div class="mw-title"><span class="material-icons-outlined" style="font-size:18px;color:#fbbf24">thermostat</span> Medienwetter Deutschland</div>
+                    </div>
+                    <div class="mw-hero" id="mwHero">
+                        <canvas id="mwWeatherCanvas" class="mw-weather-canvas"></canvas>
+                        <div class="mw-gauge-wrap">
+                            <svg class="mw-gauge-svg" viewBox="0 0 120 70">
+                                <defs>
+                                    <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%"   stop-color="#22c55e"/>
+                                        <stop offset="30%"  stop-color="#84cc16"/>
+                                        <stop offset="50%"  stop-color="#fbbf24"/>
+                                        <stop offset="75%"  stop-color="#f97316"/>
+                                        <stop offset="100%" stop-color="#ef4444"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="10" stroke-linecap="round"/>
+                                <path id="mwArc" d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke="url(#arcGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 157"/>
+                                <circle id="mwDot" cx="10" cy="65" r="6" fill="#fbbf24" stroke="#05050a" stroke-width="2"/>
+                            </svg>
+                            <div class="mw-gauge-text">
+                                <span id="mediaWeatherScore" class="mw-score">--</span>
+                                <span class="mw-score-sub">Score</span>
+                            </div>
+                        </div>
+                        <div class="mw-hero-right">
+                            <div id="mediaWeatherLabel" class="mw-label">Lade...</div>
+                            <span id="mwWeatherIcon" class="material-icons-outlined mw-icon">cloud</span>
+                        </div>
+                    </div>
+                    <div id="mediaWeatherSummary" class="mw-summary"></div>
+                    <div class="mw-expand">
+                        <button class="mw-expand-btn" data-target="mwDetails">
+                            <span class="material-icons-outlined" style="font-size:18px">chevron_right</span> Detaillierte Analyse
+                        </button>
+                        <div id="mwDetails" class="mw-expand-body hidden"></div>
+                    </div>
+                    <div class="mw-expand">
+                        <button class="mw-expand-btn" data-target="mwTrend">
+                            <span class="material-icons-outlined" style="font-size:18px">chevron_right</span> 7‑Tage‑Verlauf
+                        </button>
+                        <div id="mwTrend" class="mw-expand-body hidden"></div>
+                    </div>
+                    <div id="mediaWeatherMeta" class="mw-meta">—</div>
+                </div>
+
+                <!-- ======= DEBATTEN RADAR ======= -->
+                <div class="mw-card">
+                    <div class="mw-header">
+                        <div class="mw-title"><span class="material-icons-outlined" style="font-size:18px;color:var(--primary)">sensors</span> Debatten Radar</div>
+                    </div>
+                    <div id="debateList" class="debate-list"></div>
+                </div>
+
+                <div class="mw-card" id="rankingCard">
+                    <div class="mw-header" style="display:flex;justify-content:space-between;align-items:center;">
+                        <div class="mw-title">
+                            <span class="material-icons-outlined" style="font-size:18px;color:var(--primary)">leaderboard</span>
+                            <span>Ranking</span>
+                        </div>
+                        <button id="rankingInfoBtn" class="icon-btn" title="Info">
+                            <span class="material-icons-outlined">help_outline</span>
+                        </button>
+                    </div>
+                    <div class="ranking-tabs">
+                        <button id="rankingTabOverall" class="ranking-tab active">Gesamt</button>
+                        <button id="rankingTabTopic" class="ranking-tab">Ressort</button>
+                    </div>
+                    <div id="rankingOverall" class="ranking-body">
+                        <div class="chip-row" id="rankingWindowChips"></div>
+                        <div id="rankingOverallList"></div>
+                        <button id="rankingToggleBtn" class="text-link hidden">Alle anzeigen</button>
+                    </div>
+                    <div id="rankingTopic" class="ranking-body hidden">
+                        <div class="topic-quick">
+                            <div class="subtle-text">Schnellwahl</div>
+                            <div class="chip-row" id="topicQuickChips"></div>
+                        </div>
+                        <div class="topic-controls">
+                            <select id="topicSelect" class="topic-select"></select>
+                            <div class="chip-row" id="topicWindowChips"></div>
+                        </div>
+                        <div id="topicRankingList"></div>
+                        <button id="topicToggleBtn" class="text-link hidden">Alle anzeigen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewAllMedia" class="view-container hidden">
+      <div class="qa-all-media-page">
+        <div class="qa-all-media-header">
+          <button id="qaBackBtn" class="qa-back-btn">
+            <span class="material-icons-outlined">arrow_back_ios_new</span>
+          </button>
+          <span class="qa-all-media-title">Alle Medienquellen</span>
+          <span id="qaMediaCount" style="font-size:11px; color:var(--text-muted);"></span>
+        </div>
+        <div class="qa-search-wrap" style="margin:0 16px 8px;">
+          <span class="material-icons-outlined qa-search-icon">search</span>
+          <input id="qaAllMediaSearch" type="text" class="qa-search" placeholder="In 100+ Quellen suchen...">
+        </div>
+        <div class="qa-category-chips" id="qaCategoryChips" style="padding:0 16px; margin-bottom:10px;">
+          <span class="chip active" data-cat="all">Alle</span>
+          <span class="chip" data-cat="ueberregional">Überregional</span>
+          <span class="chip" data-cat="regional">Regional</span>
+          <span class="chip" data-cat="oerr">ÖRR</span>
+          <span class="chip" data-cat="tech">Tech</span>
+          <span class="chip" data-cat="international">International</span>
+          <span class="chip" data-cat="other">Sonstige</span>
+        </div>
+        <div id="qaMediaList" class="qa-media-list qa-media-list-full"></div>
+      </div>
+    </div>
+
+    <div id="viewAbout" class="view-container hidden">
+        <div style="padding:20px 16px;">
+            <div style="text-align:center; margin-bottom:30px;">
+                <div class="logo-pulse"><span class="material-icons-outlined" style="font-size:48px; color:var(--primary);">radar</span></div>
+                <h2 style="margin:10px 0 5px 0; font-size:20px;">JournalRadar</h2>
+                <p style="font-size:13px; color:var(--text-muted);">Für mehr Klarheit im Nachrichten-Sturm.</p>
+            </div>
+            <div class="section" style="border:none; background:transparent;">
+                <h3 style="font-size:14px; color:var(--text-main); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Warum wir das tun</h3>
+                <p style="font-size:13px; color:var(--text-muted); line-height:1.6;">Wir leben in einer Zeit der Informationsflut. Clickbait und Framing machen es schwer, die Wahrheit zu erkennen. JournalRadar ist dein digitales Immunsystem.</p>
+            </div>
+            <div style="height:1px; background:rgba(255,255,255,0.1); margin: 20px 0;"></div>
+            <h3 style="font-size:14px; color:var(--text-main); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">So funktioniert's</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-icon"><span class="material-icons-outlined">search</span></div>
+                    <div class="timeline-content"><h3>Der Scan</h3><p>Das Plugin liest den Text & das Hauptbild deines Artikels direkt im Browser.</p></div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-icon"><span class="material-icons-outlined">psychology</span></div>
+                    <div class="timeline-content"><h3>Die KI-Analyse</h3><p>Eine neurale Analyse durchleuchtet den Inhalt auf Frames, Emotionen und Muster.</p></div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-icon"><span class="material-icons-outlined">visibility</span></div>
+                    <div class="timeline-content"><h3>Die Erkenntnis</h3><p>Du erhältst einen objektiven Score und Warnungen vor Manipulation.</p></div>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:30px; padding:15px; border:1px solid rgba(255,255,255,0.05); border-radius:8px;">
+                 <div style="display:flex; justify-content:center; gap:5px; align-items:center; color:var(--green); margin-bottom:5px;">
+                     <span class="material-icons-outlined" style="font-size:16px;">shield</span><span style="font-size:12px; font-weight:600;">Datenschutz first</span>
+                 </div>
+                 <p style="font-size:11px; color:var(--text-muted); margin:0;">Wir analysieren nur den Text, den du aktiv scannst.</p>
+            </div>
+            <div style="height:40px;"></div>
+        </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <div id="footerScanner">
+        <div id="footerNormal">
+            <div id="analyzeStatus" class="analyze-status status-info">
+              <span class="material-icons-outlined" style="font-size:14px; color:var(--text-muted);">info</span> Öffne einen Nachrichtenartikel in einem Tab
+            </div>
+            <button id="paywallOverrideBtn" class="btn-paywall-override hidden">
+              <span class="material-icons-outlined" style="font-size:16px;">refresh</span>
+              Volltext sichtbar – erneut prüfen
+            </button>
+            <button id="btnAnalyze" class="btn-primary btn-locked" disabled>
+                <span class="material-icons-outlined">article</span> Kein Artikel
+            </button>
+        </div>
+    </div>
+    <div id="footerResult" class="hidden" style="display:flex; gap:8px; align-items:center;">
+        <button id="refreshButton" class="refresh-btn" title="Analyse neu starten">
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"></path><path d="M2.5 22v-6h6"></path><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8"></path><path d="M22 12.5a10 10 0 0 1-18.8 4.3L2.5 16"></path></svg>
+        </button>
+        <button id="btnReAnalyze" class="btn-primary" style="flex:1;">
+            <span class="material-icons-outlined">radar</span> Neu analysieren
+        </button>
+    </div>
+    <div id="footerDashboard" class="hidden"></div>
+  </footer>
+
+  <div id="authModal" class="auth-modal hidden">
+    <div id="authBackdrop" class="auth-backdrop"></div>
+    <div class="auth-card">
+      <div class="auth-decor auth-decor-top"></div>
+      <div class="auth-decor auth-decor-bottom"></div>
+      <div class="auth-header">
+        <div class="auth-title">
+          <span class="material-icons-outlined">radar</span>
+          <span>Journal<span class="auth-title-accent">Radar</span></span>
+        </div>
+        <button id="authClose" class="icon-btn" title="Schließen">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+      <div id="authStatus" class="auth-status">Login zum Radar</div>
+
+      <div id="authLoggedIn" class="hidden">
+        <div class="auth-info">Angemeldet als <span id="authUserEmail">—</span></div>
+        <button id="authLogoutBtn" class="auth-primary-btn">Abmelden</button>
+        <button id="authDeleteBtn" class="auth-text-btn">Account löschen</button>
+      </div>
+
+      <div id="authLoggedOut">
+        <label class="auth-label" for="authEmail">E‑Mail</label>
+        <input id="authEmail" type="email" placeholder="deine@mail.de" autocomplete="email" name="email" />
+        <div id="authHint" class="auth-hint">Wir senden dir einen Magic‑Link an deine E‑Mail.</div>
+        <button id="authSendLink" class="auth-primary-btn">Magic‑Link senden</button>
+
+        <div class="auth-divider">
+          <span></span><em>oder</em><span></span>
+        </div>
+
+        <button id="authGoogleBtn" class="auth-oauth-btn">
+          <span class="material-icons-outlined">g_mobiledata</span>
+          Mit Google anmelden
+        </button>
+      </div>
+
+      <div id="authError" class="auth-error hidden"></div>
+    </div>
+  </div>
+
+  <div id="rankingInfoModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Community Ranking</div>
+        <button class="icon-btn modal-close"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="modal-body">
+        <p>So entsteht die Rangliste:</p>
+        <ul>
+          <li>Alle Analysen der Community werden pro Medienhaus gemittelt.</li>
+          <li>Pro Gerät und Artikel zählt nur die letzte Analyse.</li>
+          <li>Der Gesamtscore wird aus den vier Einzelwerten berechnet (Clickbait, Informationsgehalt, Objektivität, Emotionalität).</li>
+          <li>Je mehr Analysen, desto stabiler das Ergebnis.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="mediaInfoModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Medienlage</div>
+        <button class="icon-btn modal-close"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="modal-body">
+        <p>Diese Ansicht bündelt Medienwetter, Debatten und Rankings auf Basis der Backend‑Snapshots und synchronisierten Analysen.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="debateModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div class="modal-title" id="debateModalTitle">Debatte</div>
+        <button class="icon-btn modal-close"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="modal-body" id="debateModalBody"></div>
+    </div>
+  </div>
+
+  <div id="topicDetailModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div class="modal-title" id="topicDetailTitle">Medienprofil</div>
+        <button class="icon-btn modal-close"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="modal-body" id="topicDetailBody"></div>
+    </div>
+  </div>
+
+  <div id="helpModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="material-icons-outlined" style="font-size:20px; color:var(--primary); margin-right:6px;">help_outline</span>
+          Hilfe
+        </div>
+        <button class="icon-btn modal-close"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="help-section">
+          <div class="help-section-title">
+            <span class="material-icons-outlined" style="color:var(--primary)">radar</span>
+            Radar
+          </div>
+          <ul class="help-list">
+            <li><strong>Artikel öffnen:</strong> Navigiere im Browser zu einem Nachrichtenartikel.</li>
+            <li><strong>Analysieren:</strong> Klicke auf „Analyse Starten" – JournalRadar extrahiert und bewertet den Artikel.</li>
+            <li><strong>Ergebnis:</strong> Du erhältst Scores für Clickbait, Fakten, Objektivität und Emotionalität + KI-Begründung.</li>
+          </ul>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title">
+            <span class="material-icons-outlined" style="color:#3B82F6">assessment</span>
+            Meine Analysen
+          </div>
+          <ul class="help-list">
+            <li>Zeigt deinen persönlichen Qualitäts-Mix, Verlauf und Top-Quellen.</li>
+            <li>Im Tab „Debatten-Radar" siehst du deine Community-Beiträge.</li>
+          </ul>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title">
+            <span class="material-icons-outlined" style="color:#fbbf24">public</span>
+            Medienlage
+          </div>
+          <ul class="help-list">
+            <li>Medienwetter, Debatten-Radar und Community-Ranking auf einen Blick.</li>
+            <li>Daten stammen aus Backend-Snapshots aller Analysen.</li>
+          </ul>
+        </div>
+        <div class="help-divider"></div>
+        <div class="help-section">
+          <div class="help-section-title">
+            <span class="material-icons-outlined" style="color:#EC4899">school</span>
+            Tutorial
+          </div>
+          <p class="help-text">Du möchtest das Onboarding nochmal sehen?</p>
+          <button class="help-restart-btn" id="helpRestartOnboarding">
+            <span class="material-icons-outlined">replay</span>
+            Onboarding neu starten
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Random Overlay -->
+  <div id="randomOverlay" class="random-overlay hidden">
+    <div class="random-overlay-backdrop"></div>
+    <div class="random-overlay-card">
+      <div class="random-overlay-logo" id="randomOverlayLogo"></div>
+      <div class="random-overlay-name" id="randomOverlayName"></div>
+      <div class="random-overlay-hint">Tippe, um zu öffnen</div>
+    </div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

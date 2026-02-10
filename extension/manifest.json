@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "JournalRadar - News Röntgen",
+  "version": "1.0",
+  "description": "Analysiert Artikel auf Rhetorik, Framing und Bias.",
+  "permissions": [
+    "sidePanel",
+    "activeTab",
+    "tabs",
+    "scripting",
+    "storage",
+    "identity"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://medienradar-backend.vercel.app/auth-callback*"
+      ],
+      "js": ["auth-content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
