@@ -404,6 +404,9 @@
                 <div class="mw-card">
                     <div class="mw-header">
                         <div class="mw-title"><span class="material-icons-outlined" style="font-size:18px;color:var(--primary)">thermostat</span> Medienwetter Deutschland</div>
+                        <button id="mediaWeatherInfoBtn" class="icon-btn" title="Info">
+                            <span class="material-icons-outlined">info_outlined</span>
+                        </button>
                     </div>
                     <div class="mw-hero" id="mwHero">
                         <canvas id="mwWeatherCanvas" class="mw-weather-canvas"></canvas>
@@ -469,7 +472,7 @@
                             <span>Ranking</span>
                         </div>
                         <button id="rankingInfoBtn" class="icon-btn" title="Info">
-                            <span class="material-icons-outlined">help_outline</span>
+                            <span class="material-icons-outlined">info_outlined</span>
                         </button>
                     </div>
                     <div class="ranking-tabs">
@@ -682,6 +685,51 @@
         <button class="icon-btn modal-close"><span class="material-icons-outlined">close</span></button>
       </div>
       <div class="modal-body" id="topicDetailBody"></div>
+    </div>
+  </div>
+
+  <div id="mediaWeatherInfoModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="material-icons-outlined" style="font-size:20px; color:var(--primary); margin-right:6px;">info_outlined</span>
+          Medienwetter erklärt
+        </div>
+        <button class="icon-btn modal-close"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="modal-body">
+        <p class="help-text">Hoher Score = mehr Drama. Niedriger Score = sachlicher Ton.</p>
+        <ul class="help-list">
+          <li><strong>Emotion:</strong> Gefühl statt nüchtern.</li>
+          <li><strong>Clickbait:</strong> Köder statt Kerninfo.</li>
+          <li><strong>Herdentrieb:</strong> Viele Medien berichten das Gleiche.</li>
+          <li><strong>Breaking:</strong> Alarm-/Eilmeldungston.</li>
+          <li><strong>Extrem‑Anteil:</strong> Viele starke Ausreißer.</li>
+          <li><strong>ÖRR‑Boost:</strong> Extra‑Punkte, wenn ÖRR (ARD/ZDF/DLF) ungewöhnlich emotional ist.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="rankingInfoModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="material-icons-outlined" style="font-size:20px; color:var(--primary); margin-right:6px;">info_outlined</span>
+          Community Ranking erklärt
+        </div>
+        <button class="icon-btn modal-close"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="modal-body">
+        <ul class="help-list">
+          <li>Wir mitteln alle Community-Analysen pro Medienhaus.</li>
+          <li>Pro Gerät und Artikel zählt nur die letzte Analyse.</li>
+          <li>Der Gesamtscore kommt aus 4 Werten: Clickbait, Informationsgehalt, Objektivität, Emotionalität.</li>
+          <li>Je mehr Analysen, desto stabiler die Werte.</li>
+        </ul>
+      </div>
     </div>
   </div>
 

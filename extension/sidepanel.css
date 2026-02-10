@@ -997,7 +997,13 @@ input:focus { border-color: var(--primary); }
   overflow: hidden;
   padding: 16px;
 }
-.mw-header { margin-bottom: 12px; }
+.mw-header {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 .mw-title {
   display: flex; align-items: center; gap: 6px;
   font-size: 15px; font-weight: 700; color: var(--text-main);

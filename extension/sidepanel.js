@@ -196,6 +196,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (btnHelp && helpModal) {
     btnHelp.addEventListener('click', () => helpModal.classList.remove('hidden'));
   }
+
+  // --- MEDIENWETTER INFO BUTTON ---
+  const mediaWeatherInfoBtn = document.getElementById('mediaWeatherInfoBtn');
+  const mediaWeatherInfoModal = document.getElementById('mediaWeatherInfoModal');
+  if (mediaWeatherInfoBtn && mediaWeatherInfoModal) {
+    mediaWeatherInfoBtn.addEventListener('click', () => mediaWeatherInfoModal.classList.remove('hidden'));
+  }
+
+  // --- RANKING INFO BUTTON ---
+  const rankingInfoBtn = document.getElementById('rankingInfoBtn');
+  const rankingInfoModal = document.getElementById('rankingInfoModal');
+  if (rankingInfoBtn && rankingInfoModal) {
+    rankingInfoBtn.addEventListener('click', () => rankingInfoModal.classList.remove('hidden'));
+  }
   const helpRestartBtn = document.getElementById('helpRestartOnboarding');
   if (helpRestartBtn) {
     helpRestartBtn.addEventListener('click', async () => {
