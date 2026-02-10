@@ -1057,7 +1057,20 @@ async function initAuth() {
     const refreshed = await refreshAuth(authState.refresh_token);
     if (!refreshed) await clearAuth();
   }
+  if (authState && authState.access_token && !authState.user) {
+    const user = await fetchAuthUser(authState.access_token);
+    if (user) {
+      authState.user = user;
+      await chrome.storage.local.set({ auth: authState });
+    }
+  }
   updateAuthUI();
+  if (authState && authState.access_token && authState.user) {
+    claimDeviceHistory().then((claimed) => {
+      if (claimed > 0) return markUnsyncedHistoryAsSynced();
+      return syncUnsyncedHistory();
+    }).catch(() => {});
+  }
 
   // Listen for auth state changes (from background script / content script)
   chrome.storage.onChanged.addListener((changes, area) => {
@@ -1070,6 +1083,10 @@ async function initAuth() {
         const modal = document.getElementById("authModal");
         if (modal) modal.classList.add("hidden");
         resetMagicLinkUI();
+        claimDeviceHistory().then((claimed) => {
+          if (claimed > 0) return markUnsyncedHistoryAsSynced();
+          return syncUnsyncedHistory();
+        }).catch(() => {});
       }
     }
   });
@@ -1431,6 +1448,12 @@ async function syncHistoryRemote(payload) {
       ...payload // includes source (e.g. 'debate_cta' or 'web')
     };
     // Add user_id if logged in
+    if (authState?.access_token && !authState.user) {
+      authState.user = await fetchAuthUser(authState.access_token);
+      if (authState.user) {
+        await chrome.storage.local.set({ auth: authState });
+      }
+    }
     if (authState?.user?.id) {
       body.user_id = authState.user.id;
     }
