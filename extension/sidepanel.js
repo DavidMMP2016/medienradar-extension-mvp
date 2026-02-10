@@ -990,9 +990,11 @@ async function saveToHistory(analysis, url, title, imageUrl) {
   }
 
   const synced = !!(authState?.user?.id);
+  const now = new Date();
   const entry = {
     id: Date.now(),
-    date: new Date().toLocaleDateString('de-DE'),
+    date: now.toLocaleDateString('de-DE'),
+    time: now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
     title, domain, url,
     score: analysis.total_score.value,
     source,
@@ -1581,6 +1583,7 @@ function normalizeRemoteHistory(rows) {
     return {
       id: row.id || Date.parse(row.created_at || "") || Date.now(),
       date: formatDateShort(row.created_at) || new Date().toLocaleDateString('de-DE'),
+      time: formatTimeShort(row.created_at) || '',
       title,
       domain,
       url,
@@ -2046,6 +2049,7 @@ function renderMaHistory() {
     if (h.domain) parts.push(h.domain);
     if (isDebateSource(h.source)) parts.push('Debatten-Radar');
     if (h.date) parts.push(h.date);
+    if (h.time) parts.push(h.time);
     metaEl.innerHTML = parts.map((p, i) => i === 0 ? `<span>${p}</span>` : `<span>\u00B7 ${p}</span>`).join('');
     infoEl.appendChild(titleEl);
     infoEl.appendChild(metaEl);
