@@ -2466,45 +2466,73 @@ function renderWeatherMetrics(weather) {
   // Compute derived metrics from available data
   const emotion = weather.avg_emotion;
   const clickbait = weather.avg_clickbait;
-  // Herdentrieb: estimated from how close emotion & clickbait are (both high = herd)
-  const herd = (emotion != null && clickbait != null)
-    ? Math.round(Math.min(emotion, clickbait) * 0.5) : null;
-  // Breaking density: estimate from weather score components
+  // Herdentrieb: prefer backend, else estimate from how close emotion & clickbait are (both high = herd)
+  const herd = weather.herd_index ?? ((emotion != null && clickbait != null)
+    ? Math.round(Math.min(emotion, clickbait) * 0.5) : null);
+  // Breaking density: prefer backend, else estimate from emotion
   const breaking = weather.breaking_density ?? (emotion != null
     ? Math.round(emotion * 0.25) : null);
-  // Extrem-Anteil: ratio of extreme scores
+  // Extrem-Anteil: prefer backend, else estimate from emotion
   const extreme = weather.extreme_ratio ?? (emotion != null
     ? Math.round(Math.max(0, emotion - 35) * 0.3) : null);
 
+  const oerrBooster = weather.oerr_booster ?? 0;
+  const oerrIndex = weather.oerr_index ?? null;
+  const oerrHitCount = weather.oerr_hit_count ?? null;
+
   const metrics = [
-    { label: 'Emotion',       value: emotion },
-    { label: 'Clickbait',     value: clickbait },
-    { label: 'Herdentrieb',   value: herd },
-    { label: 'Breaking',      value: breaking },
-    { label: 'Extrem-Anteil', value: extreme },
+    { label: 'Emotion',       value: emotion, unit: '%' },
+    { label: 'Clickbait',     value: clickbait, unit: '%' },
+    { label: 'Herdentrieb',   value: herd, unit: '%' },
+    { label: 'Breaking',      value: breaking, unit: '%' },
+    { label: 'Extrem-Anteil', value: extreme, unit: '%' },
+    { label: 'ÖRR-Boost',     value: oerrBooster, unit: 'pt', max: 12, showSign: true },
   ];
   const scoreColor = getWeatherAccentColor(weather.weather_score || 0);
-  el.innerHTML = `<div class="mw-metrics-grid">
-    ${metrics.map(m => {
-      const v = m.value != null ? Math.round(m.value) : null;
-      return `<div class="mw-metric">
+  const metricHtml = metrics.map(m => {
+    const v = m.value != null ? Math.round(m.value) : null;
+    let display = '\u2013';
+    if (v != null) {
+      if (m.showSign && v > 0) {
+        display = `+${v}`;
+      } else {
+        display = `${v}${m.unit || ''}`;
+      }
+    }
+    const width = v != null
+      ? (m.max ? Math.min(100, Math.round((v / m.max) * 100)) : v)
+      : 0;
+    return `<div class="mw-metric">
         <div class="mw-metric-row">
           <span class="mw-metric-label">${m.label}</span>
-          <span class="mw-metric-value" style="color:${scoreColor}">${v != null ? v + '%' : '\u2013'}</span>
+          <span class="mw-metric-value" style="color:${scoreColor}">${display}</span>
         </div>
-        <div class="mw-metric-bar"><div class="mw-metric-fill" style="width:${v || 0}%;background:${scoreColor}"></div></div>
+        <div class="mw-metric-bar"><div class="mw-metric-fill" style="width:${width}%;background:${scoreColor}"></div></div>
       </div>`;
-    }).join('')}
-  </div>`;
+  }).join('');
+
+  const note = (oerrBooster && oerrBooster > 0)
+    ? `<div class="mw-metric-note">ÖRR Ø‑Heat: ${oerrIndex ?? '\u2013'} · Quellen ≥45: ${oerrHitCount ?? '\u2013'}/3</div>`
+    : '';
+
+  el.innerHTML = `<div class="mw-metrics-grid">
+    ${metricHtml}
+  </div>${note}`;
 }
 
-// HIGH score = bad (red), LOW score = good (green)
+// HIGH score = bad (red), LOW score = good (green) — matches Flutter _weatherColorForScore
 function getWeatherAccentColor(score) {
-  if (score >= 80) return '#ef4444';
-  if (score >= 60) return '#f97316';
-  if (score >= 45) return '#fbbf24';
-  if (score >= 30) return '#84cc16';
-  return '#22c55e';
+  if (score >= 100) return '#2B0A0A'; // Weinrot/Fast Schwarz
+  if (score >= 90) return '#B91C1C';  // Karmesin
+  if (score >= 80) return '#EF4444';  // Helles Rot
+  if (score >= 70) return '#EA580C';  // Rotorange
+  if (score >= 60) return '#F97316';  // Helles Orange
+  if (score >= 50) return '#D97706';  // Senf
+  if (score >= 40) return '#FBBF24';  // Warngelb
+  if (score >= 30) return '#FDE047';  // Helles Gelb
+  if (score >= 20) return '#B6E43A';  // Limonengrün
+  if (score >= 10) return '#22C55E';  // Sattes Grün
+  return '#00D9B8';                   // Smaragdgrün
 }
 
 function renderWeatherTrend(weather) {
@@ -2655,46 +2683,47 @@ function renderMedienlageLocal(history) {
 }
 
 // Weather meta: HIGH score = BAD weather (more emotion/clickbait), LOW score = GOOD weather
+// Matches Flutter _weatherGradientTop / _weatherGradientBottom + labels
 function getWeatherMeta(score) {
   if (score >= 90) return {
     label: "Orkan", summary: "Extreme Verzerrung. Kaum belastbare Information.",
-    gradientTop: "rgba(220, 38, 38, 0.35)", gradientBottom: "rgba(5, 5, 10, 0.8)"
+    gradientTop: "#1A0A0A", gradientBottom: "#1A0204"
   };
   if (score >= 80) return {
     label: "Schwerer Sturm", summary: "Stark emotional aufgeladen. Faktencheck dringend empfohlen.",
-    gradientTop: "rgba(239, 68, 68, 0.3)", gradientBottom: "rgba(5, 5, 10, 0.75)"
+    gradientTop: "#1A121A", gradientBottom: "#180408"
   };
   if (score >= 70) return {
     label: "Gewitterfront", summary: "Hohe Clickbait- und Bias-Dichte. Vorsicht bei der Einordnung.",
-    gradientTop: "rgba(239, 68, 68, 0.25)", gradientBottom: "rgba(5, 5, 10, 0.7)"
+    gradientTop: "#1A1620", gradientBottom: "#140610"
   };
   if (score >= 60) return {
     label: "St\u00fcrmisch", summary: "Erhöhter Clickbait und Meinung. Quellen genau prüfen.",
-    gradientTop: "rgba(249, 115, 22, 0.25)", gradientBottom: "rgba(5, 5, 10, 0.65)"
+    gradientTop: "#1A1A24", gradientBottom: "#10080C"
   };
   if (score >= 50) return {
     label: "Frischer Wind", summary: "Durchmischte Qualität. Achte auf Emotionalisierung.",
-    gradientTop: "rgba(251, 191, 36, 0.3)", gradientBottom: "rgba(5, 5, 10, 0.55)"
+    gradientTop: "#1A1E28", gradientBottom: "#0C100C"
   };
   if (score >= 40) return {
     label: "Nieselregen / Tr\u00fcb", summary: "Die Sicht ist leicht eingeschränkt. Vereinzelt emotional.",
-    gradientTop: "rgba(251, 191, 36, 0.25)", gradientBottom: "rgba(5, 5, 10, 0.6)"
+    gradientTop: "#1A222D", gradientBottom: "#0C1410"
   };
   if (score >= 30) return {
     label: "Diesig / Neblig", summary: "Die Sicht ist eingeschränkt. Fakten und Meinung verschwimmen.",
-    gradientTop: "rgba(200, 180, 50, 0.25)", gradientBottom: "rgba(5, 5, 10, 0.55)"
+    gradientTop: "#1A2835", gradientBottom: "#0C1A14"
   };
   if (score >= 20) return {
     label: "Bew\u00f6lkt / Bedeckt", summary: "Solide Qualität, vereinzelt emotionale Tendenzen.",
-    gradientTop: "rgba(132, 204, 22, 0.25)", gradientBottom: "rgba(5, 5, 10, 0.55)"
+    gradientTop: "#1A2E3D", gradientBottom: "#0C2018"
   };
   if (score >= 10) return {
     label: "Heiter bis wolkig", summary: "Gute Tendenz mit einzelnen Ausreißern. Weiter so.",
-    gradientTop: "rgba(34, 197, 94, 0.3)", gradientBottom: "rgba(5, 5, 10, 0.55)"
+    gradientTop: "#1A3545", gradientBottom: "#0C2620"
   };
   return {
     label: "Strahlend Sonnig", summary: "Außergewöhnlich hohe Qualität. Kaum Clickbait, sehr faktenstark.",
-    gradientTop: "rgba(34, 197, 94, 0.4)", gradientBottom: "rgba(5, 5, 10, 0.5)"
+    gradientTop: "#1A3A4A", gradientBottom: "#0C2B22"
   };
 }
 
@@ -2757,9 +2786,8 @@ function animateGauge(score) {
     const cy = 65 - 50 * Math.sin(angle);
     dot.setAttribute('cx', cx);
     dot.setAttribute('cy', cy);
-    // Colour the dot: left=green, right=red
-    const colors = ['#22c55e','#84cc16','#fbbf24','#f97316','#ef4444'];
-    dot.setAttribute('fill', colors[Math.min(4, Math.floor(pct * 5))]);
+    // Colour the dot using Flutter accent color scale
+    dot.setAttribute('fill', getWeatherAccentColor(s));
   }
 
   // Animate number counting
@@ -2781,11 +2809,10 @@ function animateGauge(score) {
       `linear-gradient(135deg, ${meta.gradientTop}, ${meta.gradientBottom})`;
   }
 
-  // Set label colour: HIGH score = red (bad), LOW score = green (good)
+  // Set label colour using Flutter accent color scale
   const labelEl = document.getElementById('mediaWeatherLabel');
   if (labelEl) {
-    const colors = ['#22c55e','#84cc16','#fbbf24','#f97316','#ef4444'];
-    labelEl.style.color = colors[Math.min(4, Math.floor(s / 20))];
+    labelEl.style.color = getWeatherAccentColor(s);
   }
 
   // Weather icon with animations: HIGH score = storm, LOW score = sunny

@@ -2018,6 +2018,11 @@ input:focus { border-color: var(--primary); }
   height: 100%; border-radius: 2px; opacity: 0.8;
   transition: width 0.8s ease;
 }
+.mw-metric-note {
+  margin-top: 6px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+}
 
 /* ======= WEATHER TREND / SPARKLINE ======= */
 .mw-trend-header {
